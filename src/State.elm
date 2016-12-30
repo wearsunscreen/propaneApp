@@ -1,11 +1,22 @@
 module State exposing (..)
 
+import Task exposing (..)
+import Time
 import Types exposing (..)
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( Model "", Cmd.none )
+    ( { record =
+            { version = 1
+            , tankSize = 250
+            , entries = []
+            }
+      , time = Nothing
+      , percent = ""
+      }
+    , Cmd.none
+    )
 
 
 subs : Model -> Sub Msg
@@ -15,16 +26,15 @@ subs model =
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    let
-        m =
-            case msg of
-                SaveSample ->
-                    model
+    case msg of
+        EnterSample percent ->
+            ( { model | percent = percent }, Cmd.none )
 
-                SetSample percent ->
-                    { model | percent = percent }
+        OnSave ->
+            model ! [ Task.perform StoreSample Time.now ]
 
-                Reset ->
-                    model
-    in
-        ( m, Cmd.none )
+        Reset ->
+            ( model, Cmd.none )
+
+        StoreSample time ->
+            ( { model | time = Just time }, Cmd.none )

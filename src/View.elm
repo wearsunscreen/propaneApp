@@ -21,6 +21,27 @@ prompt model =
         [ text "What is your tank level today?" ]
 
 
+viewTime : Model -> Html msg
+viewTime model =
+    let
+        time =
+            case model.time of
+                Nothing ->
+                    ""
+
+                Just theTime ->
+                    toString theTime
+    in
+        div
+            [ style
+                [ ( "color", "green" )
+                , ( "text-align", "center" )
+                , ( "padding", "30px" )
+                ]
+            ]
+            [ text time ]
+
+
 view : Model -> Html Msg
 view model =
     div
@@ -31,9 +52,10 @@ view model =
             ]
         ]
         [ prompt model
-        , input [ type_ "text", placeholder "percent full", onInput SetSample ] []
+        , input [ type_ "text", placeholder "percent full", onInput EnterSample ] []
         , text "%"
         , viewValidation model
+        , viewTime model
         ]
 
 
@@ -61,5 +83,5 @@ viewValidation model =
                     ]
                 ]
                 [ text message ]
-            , div [] [ button [ onClick SaveSample, disabled noPress ] [ text "Save" ] ]
+            , div [] [ button [ onClick OnSave, disabled noPress ] [ text "Save" ] ]
             ]
