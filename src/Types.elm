@@ -1,14 +1,31 @@
 module Types exposing (..)
 
+import Maybe
+
+
+-- Types
+
 
 type alias Model =
-    { name : String
-    , password : String
-    , passwordAgain : String
+    { percent : String
     }
 
 
 type Msg
-    = Name String
-    | Password String
-    | PasswordAgain String
+    = SetSample String
+    | SaveSample
+    | Reset
+
+
+
+-- Some convenience functions
+
+
+(??) : Maybe a -> a -> a
+(??) m d =
+    Maybe.withDefault d m
+
+
+(=>) : a -> b -> ( a, b )
+(=>) =
+    (,)

@@ -5,7 +5,7 @@ import Types exposing (..)
 
 init : ( Model, Cmd Msg )
 init =
-    ( Model "" "" "", Cmd.none )
+    ( Model "", Cmd.none )
 
 
 subs : Model -> Sub Msg
@@ -18,13 +18,13 @@ update msg model =
     let
         m =
             case msg of
-                Name name ->
-                    { model | name = name }
+                SaveSample ->
+                    model
 
-                Password password ->
-                    { model | password = password }
+                SetSample percent ->
+                    { model | percent = percent }
 
-                PasswordAgain password ->
-                    { model | passwordAgain = password }
+                Reset ->
+                    model
     in
         ( m, Cmd.none )
