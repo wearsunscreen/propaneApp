@@ -1,7 +1,7 @@
 module State exposing (..)
 
 import Task exposing (..)
-import Time
+import Time exposing (Time)
 import Types exposing (..)
 
 
@@ -17,6 +17,30 @@ init =
       }
     , Cmd.none
     )
+
+
+saveSample : Time -> Model -> Model
+saveSample time model =
+    let
+        percent =
+            case String.toInt model.percent of
+                Ok x ->
+                    x
+
+                Err msg ->
+                    0
+    in
+        { model
+            | record =
+                { version = model.record.version
+                , tankSize = model.record.tankSize
+                , entries =
+                    ( percent, time )
+                        :: model.record.entries
+                        |> List.sortBy Tuple.second
+                }
+            , time = Just time
+        }
 
 
 subs : Model -> Sub Msg
@@ -37,4 +61,4 @@ update msg model =
             ( model, Cmd.none )
 
         StoreSample time ->
-            ( { model | time = Just time }, Cmd.none )
+            ( saveSample time model, Cmd.none )

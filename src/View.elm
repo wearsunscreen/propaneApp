@@ -1,14 +1,23 @@
 module View exposing (..)
 
+import Date
+import Date.Extra exposing (toFormattedString)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import String exposing (toInt)
+import Time exposing (Time)
+import Tuple exposing (..)
 import Types exposing (..)
 
 
-prompt : Model -> Html msg
-prompt model =
+newestEntry : Model -> Entry
+newestEntry model =
+    List.head model.record.entries ?? ( 0, 0 )
+
+
+promptPercent : Model -> Html Msg
+promptPercent model =
     div
         [ style
             [ ( "color", "green" )
@@ -18,10 +27,73 @@ prompt model =
             , ( "padding", "30px" )
             ]
         ]
-        [ text "What is your tank level today?" ]
+        [ text "What is your tank level today?"
+        , input [ type_ "text", placeholder "percent full", onInput EnterSample ] []
+        , text "%"
+        , viewValidation model
+        ]
 
 
-viewTime : Model -> Html msg
+view : Model -> Html Msg
+view model =
+    let
+        sameDay : Time -> Time -> Bool
+        sameDay t1 t2 =
+            let
+                s1 =
+                    toFormattedString "M d y" (Date.fromTime t1)
+
+                s2 =
+                    toFormattedString "M d y" (Date.fromTime t2)
+            in
+                s1 /= s2
+
+        prompt =
+            case model.time of
+                Nothing ->
+                    True
+
+                Just theTime ->
+                    sameDay theTime (Tuple.second (newestEntry model))
+    in
+        div
+            [ style
+                [ ( "color", "green" )
+                , ( "text-align", "center" )
+                , ( "padding", "30px" )
+                ]
+            ]
+            [ if prompt then
+                promptPercent model
+              else
+                viewStatus model
+            , viewRecord model
+            , viewTime model
+            ]
+
+
+viewStatus : Model -> Html Msg
+viewStatus model =
+    let
+        time =
+            case model.time of
+                Nothing ->
+                    ""
+
+                Just theTime ->
+                    toString theTime
+    in
+        div
+            [ style
+                [ ( "color", "green" )
+                , ( "text-align", "center" )
+                , ( "padding", "30px" )
+                ]
+            ]
+            [ text time ]
+
+
+viewTime : Model -> Html Msg
 viewTime model =
     let
         time =
@@ -42,8 +114,8 @@ viewTime model =
             [ text time ]
 
 
-view : Model -> Html Msg
-view model =
+viewRecord : Model -> Html Msg
+viewRecord model =
     div
         [ style
             [ ( "color", "green" )
@@ -51,11 +123,21 @@ view model =
             , ( "padding", "30px" )
             ]
         ]
-        [ prompt model
-        , input [ type_ "text", placeholder "percent full", onInput EnterSample ] []
-        , text "%"
-        , viewValidation model
-        , viewTime model
+        (List.map viewEntry model.record.entries)
+
+
+viewEntry : Entry -> Html Msg
+viewEntry ( percent, date ) =
+    div
+        [ style
+            [ ( "color", "green" )
+            , ( "text-align", "center" )
+            , ( "padding", "5px" )
+            ]
+        ]
+        [ text (toString percent)
+        , text "% "
+        , text (toFormattedString "MMM d, y" (Date.fromTime date))
         ]
 
 
@@ -64,7 +146,7 @@ viewValidation model =
     let
         ( color, message, noPress ) =
             case String.toInt model.percent of
-                Err s ->
+                Err msg ->
                     ( "red", "Percent must be between 0 and 100", True )
 
                 Ok n ->
