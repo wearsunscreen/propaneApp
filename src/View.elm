@@ -1,60 +1,32 @@
 module View exposing (..)
 
-import Date
+import Date exposing (Date, fromTime, now)
 import Date.Extra exposing (toFormattedString)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import String exposing (toInt)
+import Task exposing (perform)
 import Time exposing (Time)
 import Tuple exposing (..)
 import Types exposing (..)
 
 
-newestEntry : Model -> Entry
-newestEntry model =
-    List.head model.record.entries ?? ( 0, 0 )
-
-
-promptPercent : Model -> Html Msg
-promptPercent model =
-    div
-        [ style
-            [ ( "color", "green" )
-            , ( "text-align", "center" )
-            , ( "font-weight", "bolder" )
-            , ( "font-size", "200%" )
-            , ( "padding", "30px" )
-            ]
-        ]
-        [ text "What is your tank level today?"
-        , input [ type_ "text", placeholder "percent full", onInput EnterSample ] []
-        , text "%"
-        , viewValidation model
-        ]
+newestRefill : Model -> Refill
+newestRefill model =
+    List.head model.record.refills ?? ( 0, (Date.fromTime 0.0) )
 
 
 view : Model -> Html Msg
 view model =
     let
-        sameDay : Time -> Time -> Bool
-        sameDay t1 t2 =
-            let
-                s1 =
-                    toFormattedString "M d y" (Date.fromTime t1)
-
-                s2 =
-                    toFormattedString "M d y" (Date.fromTime t2)
-            in
-                s1 /= s2
-
-        prompt =
-            case model.time of
+        knowDate =
+            case model.today of
                 Nothing ->
                     True
 
                 Just theTime ->
-                    sameDay theTime (Tuple.second (newestEntry model))
+                    False
     in
         div
             [ style
@@ -63,20 +35,21 @@ view model =
                 , ( "padding", "30px" )
                 ]
             ]
-            [ if prompt then
-                promptPercent model
-              else
-                viewStatus model
-            , viewRecord model
-            , viewTime model
-            ]
+            (if knowDate then
+                [ welcomeScreen model ]
+             else
+                [ viewStatus model
+                , viewRecord model
+                , viewTime model
+                ]
+            )
 
 
 viewStatus : Model -> Html Msg
 viewStatus model =
     let
         time =
-            case model.time of
+            case model.today of
                 Nothing ->
                     ""
 
@@ -97,9 +70,9 @@ viewTime : Model -> Html Msg
 viewTime model =
     let
         time =
-            case model.time of
+            case model.today of
                 Nothing ->
-                    ""
+                    "Today is ??"
 
                 Just theTime ->
                     toString theTime
@@ -123,11 +96,11 @@ viewRecord model =
             , ( "padding", "30px" )
             ]
         ]
-        (List.map viewEntry model.record.entries)
+        (List.map viewRefill model.record.refills)
 
 
-viewEntry : Entry -> Html Msg
-viewEntry ( percent, date ) =
+viewRefill : Refill -> Html Msg
+viewRefill ( percent, date ) =
     div
         [ style
             [ ( "color", "green" )
@@ -137,7 +110,7 @@ viewEntry ( percent, date ) =
         ]
         [ text (toString percent)
         , text "% "
-        , text (toFormattedString "MMM d, y" (Date.fromTime date))
+        , text (toFormattedString "MMM d, y" date)
         ]
 
 
@@ -167,3 +140,19 @@ viewValidation model =
                 [ text message ]
             , div [] [ button [ onClick OnSave, disabled noPress ] [ text "Save" ] ]
             ]
+
+
+welcomeScreen : Model -> Html Msg
+welcomeScreen model =
+    div [ style [ ( "padding", "30px" ) ] ]
+        [ div
+            [ style
+                [ ( "color", "green" )
+                , ( "text-align", "center" )
+                , ( "font-weight", "bolder" )
+                , ( "font-size", "220%" )
+                ]
+            ]
+            [ text "Welcome to Propane!" ]
+        , div [] [ button [ onClick CloseWelcomeScreen ] [ text "Ok" ] ]
+        ]

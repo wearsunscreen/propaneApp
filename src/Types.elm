@@ -1,7 +1,7 @@
 module Types exposing (..)
 
+import Date exposing (Date)
 import Maybe
-import Time exposing (Time)
 
 
 -- Types
@@ -11,29 +11,30 @@ import Time exposing (Time)
     percent, as Int 0 - 100
     Time, date of recording
 -}
-type alias Entry =
-    ( Int, Time )
+type alias Refill =
+    ( Float, Date )
 
 
 type alias Record =
     { version : Int
     , tankSize : Int
-    , entries : List Entry
+    , refills : List Refill
     }
 
 
 type alias Model =
     { percent : String
-    , time : Maybe Time
+    , today : Maybe Date
+    , recentUsage : Maybe Float
     , record : Record
     }
 
 
 type Msg
-    = EnterSample String
+    = CloseWelcomeScreen
+    | EnterSample String
     | OnSave
-    | StoreSample Time.Time
-    | Reset
+    | ShowStatus Date
 
 
 
