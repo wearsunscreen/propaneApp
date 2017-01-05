@@ -1,9 +1,10 @@
-module State exposing (..)
+module Update exposing (..)
 
-import Date exposing (Date)
+import Date exposing (..)
+import Date.Extra exposing (..)
+import List exposing (..)
+import Model exposing (..)
 import Task exposing (..)
-import Time exposing (Time)
-import Types exposing (..)
 
 
 bugbug_RefillValues : List Refill
@@ -18,12 +19,12 @@ bugbug_RefillValues =
                 Err s ->
                     Date.fromTime 0.0
     in
-        [ ( 100.0, testDate "Jan 1, 2016" )
-        , ( 100.0, testDate "Mar 3, 2016" )
-        , ( 10.0, testDate "May 5, 2016" )
-        , ( 50.0, testDate "Nov 11, 2016" )
-        , ( 100.0, testDate "Dec 11, 2016" )
-        ]
+        sortRefills
+            [ { gallons = 100, date = fromCalendarDate 2016 Sep 1 }
+            , { gallons = 100, date = fromCalendarDate 2016 Nov 17 }
+            , { gallons = 100, date = fromCalendarDate 2016 Dec 12 }
+            , { gallons = 100, date = fromCalendarDate 2017 Jan 21 }
+            ]
 
 
 init : ( Model, Cmd Msg )
@@ -41,29 +42,14 @@ init =
     )
 
 
-saveSample : Date -> Model -> Model
-saveSample date model =
+sortRefills : List Refill -> List Refill
+sortRefills list =
     let
-        percent =
-            case String.toFloat model.percent of
-                Ok x ->
-                    x
-
-                Err msg ->
-                    0
+        compareRefill : Refill -> Refill -> Order
+        compareRefill a b =
+            Basics.compare (toTime a.date) (toTime b.date)
     in
-        { model
-            | record =
-                { version = model.record.version
-                , tankSize = model.record.tankSize
-                , refills =
-                    ( percent, date )
-                        :: model.record.refills
-                        |> List.sortBy (Tuple.second >> Date.toTime)
-                }
-            , recentUsage = model.recentUsage
-            , today = Just date
-        }
+        List.sortWith compareRefill list |> List.reverse
 
 
 subs : Model -> Sub Msg
@@ -83,5 +69,5 @@ update msg model =
         CloseWelcomeScreen ->
             model ! [ Task.perform ShowStatus Date.now ]
 
-        ShowStatus time ->
-            ( saveSample time model, Cmd.none )
+        ShowStatus date ->
+            ( { model | today = Just date }, Cmd.none )

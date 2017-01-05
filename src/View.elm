@@ -1,20 +1,41 @@
 module View exposing (..)
 
 import Date exposing (Date, fromTime, now)
-import Date.Extra exposing (toFormattedString)
+import Date.Extra exposing (..)
+import Debug as D exposing (log)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
+import Model exposing (..)
+import Result exposing (..)
 import String exposing (toInt)
-import Task exposing (perform)
-import Time exposing (Time)
-import Tuple exposing (..)
-import Types exposing (..)
 
 
-newestRefill : Model -> Refill
-newestRefill model =
-    List.head model.record.refills ?? ( 0, (Date.fromTime 0.0) )
+getRateDays : Model -> Result String ( Float, Date )
+getRateDays model =
+    case model.record.refills of
+        [] ->
+            Err "no refills"
+
+        [ r1 ] ->
+            Err "no refills"
+
+        r1 :: r2 :: rest ->
+            let
+                daysBetweenLastFills =
+                    log "daysBetweenLastFills" (diff Date.Extra.Day (log "r2" r2.date) (log "r1" r1.date))
+
+                galsPerDay =
+                    Debug.log "galsPerDay"
+                        ((toFloat (truncate (r1.gallons / (toFloat daysBetweenLastFills) * 10))) / 10)
+
+                daysToNextFill =
+                    ((toFloat model.record.tankSize) * 0.55) / galsPerDay |> truncate
+
+                dateOfNextRefill =
+                    Date.Extra.add Day daysToNextFill r1.date
+            in
+                Ok ( galsPerDay, dateOfNextRefill )
 
 
 view : Model -> Html Msg
@@ -40,30 +61,37 @@ view model =
              else
                 [ viewStatus model
                 , viewRecord model
-                , viewTime model
                 ]
             )
 
 
 viewStatus : Model -> Html Msg
 viewStatus model =
-    let
-        time =
-            case model.today of
-                Nothing ->
-                    ""
-
-                Just theTime ->
-                    toString theTime
-    in
-        div
-            [ style
-                [ ( "color", "green" )
-                , ( "text-align", "center" )
-                , ( "padding", "30px" )
+    case getRateDays model of
+        Err s ->
+            div
+                [ style
+                    [ ( "color", "red" )
+                    , ( "text-align", "center" )
+                    , ( "font-size", "140%" )
+                    , ( "padding", "30px" )
+                    ]
                 ]
-            ]
-            [ text time ]
+                [ text "Cannot calculate usage before the second refill" ]
+
+        Ok ( rate, refillDate ) ->
+            div
+                [ style
+                    [ ( "color", "green" )
+                    , ( "text-align", "center" )
+                    , ( "font-size", "180%" )
+                    , ( "padding", "30px" )
+                    ]
+                ]
+                [ text ("Call to refill on " ++ (toFormattedString "MMM d, y" refillDate))
+                , p [] []
+                , text (toString rate ++ " gallons used per day.")
+                ]
 
 
 viewTime : Model -> Html Msg
@@ -100,7 +128,7 @@ viewRecord model =
 
 
 viewRefill : Refill -> Html Msg
-viewRefill ( percent, date ) =
+viewRefill refill =
     div
         [ style
             [ ( "color", "green" )
@@ -108,9 +136,9 @@ viewRefill ( percent, date ) =
             , ( "padding", "5px" )
             ]
         ]
-        [ text (toString percent)
-        , text "% "
-        , text (toFormattedString "MMM d, y" date)
+        [ text (toString refill.gallons)
+        , text " gallons on "
+        , text (toFormattedString "MMM d, y" refill.date)
         ]
 
 

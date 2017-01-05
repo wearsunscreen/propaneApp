@@ -1,4 +1,4 @@
-module Types exposing (..)
+module Model exposing (..)
 
 import Date exposing (Date)
 import Maybe
@@ -7,12 +7,10 @@ import Maybe
 -- Types
 
 
-{-| Entry holds
-    percent, as Int 0 - 100
-    Time, date of recording
--}
 type alias Refill =
-    ( Float, Date )
+    { date : Date
+    , gallons : Float
+    }
 
 
 type alias Record =
