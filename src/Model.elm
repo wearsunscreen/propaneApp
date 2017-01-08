@@ -20,11 +20,20 @@ type alias Record =
     }
 
 
+type alias DateSelector =
+    { isOpen : Bool
+    , maximum : Date
+    , minimum : Date
+    , selected : Maybe Date
+    }
+
+
 type alias Model =
-    { percent : String
-    , today : Maybe Date
+    { dateSelector : DateSelector
+    , percent : String
     , recentUsage : Maybe Float
     , record : Record
+    , today : Maybe Date
     }
 
 
@@ -33,6 +42,8 @@ type Msg
     | EnterSample String
     | OnSave
     | ShowStatus Date
+    | SelectDate Date
+    | ToggleDate
 
 
 

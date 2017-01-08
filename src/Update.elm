@@ -34,6 +34,12 @@ init =
             , tankSize = 250
             , refills = bugbug_RefillValues
             }
+      , dateSelector =
+            DateSelector
+                False
+                (fromCalendarDate 2017 Sep 15)
+                (fromCalendarDate 2011 Mar 15)
+                (Just <| fromCalendarDate 2016 Sep 15)
       , percent = ""
       , recentUsage = Nothing
       , today = Nothing
@@ -57,6 +63,16 @@ subs model =
     Sub.none
 
 
+selectDate : Date -> DateSelector -> DateSelector
+selectDate date ds =
+    { ds | selected = Just date }
+
+
+toggleDateSelector : DateSelector -> DateSelector
+toggleDateSelector ds =
+    { ds | isOpen = not ds.isOpen }
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case Debug.log "msg = " msg of
@@ -71,3 +87,9 @@ update msg model =
 
         ShowStatus date ->
             ( { model | today = Just date }, Cmd.none )
+
+        SelectDate date ->
+            ( { model | dateSelector = selectDate date model.dateSelector }, Cmd.none )
+
+        ToggleDate ->
+            ( { model | dateSelector = toggleDateSelector model.dateSelector }, Cmd.none )

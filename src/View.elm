@@ -2,6 +2,7 @@ module View exposing (..)
 
 import Date exposing (Date, fromTime, now)
 import Date.Extra exposing (..)
+import DateSelectorDropdown
 import Debug as D exposing (log)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -59,8 +60,23 @@ view model =
             (if knowDate then
                 [ welcomeScreen model ]
              else
-                [ viewStatus model
+                [ Html.node "style"
+                    []
+                    [ text <|
+                        String.join " "
+                            [ "@import url(./propaneApp.css);"
+                            , "@import url(./date-selector.css);"
+                            ]
+                    ]
+                , viewStatus model
                 , viewRecord model
+                , DateSelectorDropdown.view
+                    ToggleDate
+                    SelectDate
+                    model.dateSelector.isOpen
+                    model.dateSelector.minimum
+                    model.dateSelector.maximum
+                    model.dateSelector.selected
                 ]
             )
 
