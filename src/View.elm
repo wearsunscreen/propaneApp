@@ -8,6 +8,7 @@ import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Model exposing (..)
+import Refills
 import Result exposing (..)
 import String exposing (toInt)
 
@@ -41,44 +42,25 @@ getRateDays model =
 
 view : Model -> Html Msg
 view model =
-    let
-        knowDate =
-            case model.today of
-                Nothing ->
-                    True
-
-                Just theTime ->
-                    False
-    in
-        div
-            [ style
-                [ ( "color", "green" )
-                , ( "text-align", "center" )
-                , ( "padding", "30px" )
-                ]
+    div
+        [ style
+            [ ( "color", "green" )
+            , ( "text-align", "center" )
+            , ( "padding", "30px" )
             ]
-            (if knowDate then
+        ]
+        (case model.mode of
+            Welcome ->
                 [ welcomeScreen model ]
-             else
-                [ Html.node "style"
-                    []
-                    [ text <|
-                        String.join " "
-                            [ "@import url(./propaneApp.css);"
-                            , "@import url(./date-selector.css);"
-                            ]
-                    ]
-                , viewStatus model
+
+            Status ->
+                [ viewStatus model
                 , viewRecord model
-                , DateSelectorDropdown.view
-                    ToggleDate
-                    SelectDate
-                    model.dateSelector.isOpen
-                    model.dateSelector.minimum
-                    model.dateSelector.maximum
-                    model.dateSelector.selected
                 ]
-            )
+
+            EditRefills ->
+                Refills.view model
+        )
 
 
 viewStatus : Model -> Html Msg
@@ -107,6 +89,8 @@ viewStatus model =
                 [ text ("Call to refill on " ++ (toFormattedString "MMM d, y" refillDate))
                 , p [] []
                 , text (toString rate ++ " gallons used per day.")
+                , p [] []
+                , div [] [ button [ onClick EnterEditRefills ] [ text "Edit Refills" ] ]
                 ]
 
 

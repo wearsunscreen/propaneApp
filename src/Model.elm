@@ -29,7 +29,8 @@ type alias DateSelector =
 
 
 type alias Model =
-    { dateSelector : DateSelector
+    { mode : Mode
+    , dateSelector : DateSelector
     , percent : String
     , recentUsage : Maybe Float
     , record : Record
@@ -39,11 +40,18 @@ type alias Model =
 
 type Msg
     = CloseWelcomeScreen
+    | EnterEditRefills
     | EnterSample String
     | OnSave
     | ShowStatus Date
     | SelectDate Date
     | ToggleDate
+
+
+type Mode
+    = Welcome
+    | Status
+    | EditRefills
 
 
 

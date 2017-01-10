@@ -4,6 +4,7 @@ import Date exposing (..)
 import Date.Extra exposing (..)
 import List exposing (..)
 import Model exposing (..)
+import Refills
 import Task exposing (..)
 
 
@@ -29,7 +30,8 @@ bugbug_RefillValues =
 
 init : ( Model, Cmd Msg )
 init =
-    ( { record =
+    ( { mode = Welcome
+      , record =
             { version = 1
             , tankSize = 250
             , refills = bugbug_RefillValues
@@ -75,7 +77,10 @@ toggleDateSelector ds =
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case Debug.log "msg = " msg of
+    case msg of
+        EnterEditRefills ->
+            ( { model | mode = EditRefills }, Cmd.none )
+
         EnterSample percent ->
             ( { model | percent = percent }, Cmd.none )
 
@@ -83,7 +88,7 @@ update msg model =
             model ! [ Task.perform ShowStatus Date.now ]
 
         CloseWelcomeScreen ->
-            model ! [ Task.perform ShowStatus Date.now ]
+            { model | mode = Status } ! [ Task.perform ShowStatus Date.now ]
 
         ShowStatus date ->
             ( { model | today = Just date }, Cmd.none )
