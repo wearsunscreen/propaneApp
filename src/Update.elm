@@ -24,7 +24,7 @@ bugbug_RefillValues =
             [ { gallons = 100, date = fromCalendarDate 2016 Sep 1 }
             , { gallons = 100, date = fromCalendarDate 2016 Nov 17 }
             , { gallons = 100, date = fromCalendarDate 2016 Dec 12 }
-            , { gallons = 100, date = fromCalendarDate 2017 Jan 21 }
+            , { gallons = 100, date = fromCalendarDate 2017 Jan 1 }
             ]
 
 
@@ -77,7 +77,7 @@ update msg model =
         AddRefill ->
             { model
                 | mode = Status
-                , refills = Refills.addRefill model.refills
+                , refills = sortRefills (Refills.addRefill model.dateSelector.selected (model.tankSize * 0.8) model.refills)
             }
                 ! [ Task.perform ShowStatus Date.now ]
 

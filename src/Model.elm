@@ -35,7 +35,7 @@ type alias Model =
     { dateSelector : DateSelector
     , mode : Mode
     , refills : List Refill
-    , tankSize : Int
+    , tankSize : Float
     , today : Maybe Date
     , version : Int
     }

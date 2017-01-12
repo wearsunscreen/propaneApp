@@ -32,7 +32,7 @@ getRateDays model =
                         ((toFloat (truncate (r1.gallons / (toFloat daysBetweenLastFills) * 10))) / 10)
 
                 daysToNextFill =
-                    ((toFloat model.tankSize) * 0.55) / galsPerDay |> truncate
+                    (model.tankSize * 0.55) / galsPerDay |> truncate
 
                 dateOfNextRefill =
                     Date.Extra.add Day daysToNextFill r1.date
