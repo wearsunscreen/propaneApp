@@ -7,19 +7,6 @@ import Maybe
 -- Types
 
 
-type alias Refill =
-    { date : Date
-    , gallons : Float
-    }
-
-
-type alias Record =
-    { version : Int
-    , tankSize : Int
-    , refills : List Refill
-    }
-
-
 type alias DateSelector =
     { isOpen : Bool
     , maximum : Date
@@ -28,20 +15,10 @@ type alias DateSelector =
     }
 
 
-type alias Model =
-    { mode : Mode
-    , dateSelector : DateSelector
-    , percent : String
-    , recentUsage : Maybe Float
-    , record : Record
-    , today : Maybe Date
-    }
-
-
 type Msg
-    = CloseWelcomeScreen
-    | EnterEditRefills
-    | EnterSample String
+    = AddRefill
+    | CloseWelcomeScreen
+    | EnterAddRefills
     | OnSave
     | ShowStatus Date
     | SelectDate Date
@@ -52,6 +29,22 @@ type Mode
     = Welcome
     | Status
     | EditRefills
+
+
+type alias Model =
+    { dateSelector : DateSelector
+    , mode : Mode
+    , refills : List Refill
+    , tankSize : Int
+    , today : Maybe Date
+    , version : Int
+    }
+
+
+type alias Refill =
+    { date : Date
+    , gallons : Float
+    }
 
 
 

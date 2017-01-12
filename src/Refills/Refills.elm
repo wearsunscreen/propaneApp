@@ -1,9 +1,21 @@
 module Refills exposing (..)
 
+import Date
+import Date.Extra
 import DateSelectorDropdown
 import Html exposing (..)
 import Html.Events exposing (onClick, onInput)
 import Model exposing (..)
+
+
+addRefill : List Refill -> List Refill
+addRefill list =
+    list
+
+
+jan1_2016 : Date.Date
+jan1_2016 =
+    Date.fromTime 1451606400.0
 
 
 view : Model -> List (Html Msg)
@@ -20,9 +32,10 @@ view model =
         ToggleDate
         SelectDate
         model.dateSelector.isOpen
-        model.dateSelector.minimum
-        model.dateSelector.maximum
+        (Date.Extra.fromCalendarDate 2015 Date.Jan 1)
+        (model.today ?? Date.Extra.fromCalendarDate 2100 Date.Jan 1)
         model.dateSelector.selected
-    , p [] []
-    , div [] [ button [ onClick CloseWelcomeScreen ] [ text "Go Back" ] ]
+    , span [] [ text " " ]
+    , button [ onClick AddRefill ] [ text "Ok" ]
+    , button [ onClick CloseWelcomeScreen ] [ text "Cancel" ]
     ]

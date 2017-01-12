@@ -15,7 +15,7 @@ import String exposing (toInt)
 
 getRateDays : Model -> Result String ( Float, Date )
 getRateDays model =
-    case model.record.refills of
+    case model.refills of
         [] ->
             Err "no refills"
 
@@ -32,7 +32,7 @@ getRateDays model =
                         ((toFloat (truncate (r1.gallons / (toFloat daysBetweenLastFills) * 10))) / 10)
 
                 daysToNextFill =
-                    ((toFloat model.record.tankSize) * 0.55) / galsPerDay |> truncate
+                    ((toFloat model.tankSize) * 0.55) / galsPerDay |> truncate
 
                 dateOfNextRefill =
                     Date.Extra.add Day daysToNextFill r1.date
@@ -90,7 +90,7 @@ viewStatus model =
                 , p [] []
                 , text (toString rate ++ " gallons used per day.")
                 , p [] []
-                , div [] [ button [ onClick EnterEditRefills ] [ text "Edit Refills" ] ]
+                , div [] [ button [ onClick EnterAddRefills ] [ text "Add Refill" ] ]
                 ]
 
 
@@ -124,7 +124,7 @@ viewRecord model =
             , ( "padding", "30px" )
             ]
         ]
-        (List.map viewRefill model.record.refills)
+        (List.map viewRefill model.refills)
 
 
 viewRefill : Refill -> Html Msg
@@ -140,34 +140,6 @@ viewRefill refill =
         , text " gallons on "
         , text (toFormattedString "MMM d, y" refill.date)
         ]
-
-
-viewValidation : Model -> Html Msg
-viewValidation model =
-    let
-        ( color, message, noPress ) =
-            case String.toInt model.percent of
-                Err msg ->
-                    ( "red", "Percent must be between 0 and 100", True )
-
-                Ok n ->
-                    if n >= 0 && n <= 100 then
-                        ( "green", " ", False )
-                    else
-                        ( "red", "Percent must be between 0 and 100", True )
-    in
-        div [ style [ ( "padding", "30px" ) ] ]
-            [ div
-                [ style
-                    [ ( "color", color )
-                    , ( "text-align", "center" )
-                    , ( "font-weight", "bolder" )
-                    , ( "font-size", "110%" )
-                    ]
-                ]
-                [ text message ]
-            , div [] [ button [ onClick OnSave, disabled noPress ] [ text "Save" ] ]
-            ]
 
 
 welcomeScreen : Model -> Html Msg

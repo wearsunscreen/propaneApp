@@ -30,21 +30,17 @@ bugbug_RefillValues =
 
 init : ( Model, Cmd Msg )
 init =
-    ( { mode = Welcome
-      , record =
-            { version = 1
-            , tankSize = 250
-            , refills = bugbug_RefillValues
-            }
-      , dateSelector =
+    ( { dateSelector =
             DateSelector
                 False
                 (fromCalendarDate 2017 Sep 15)
                 (fromCalendarDate 2011 Mar 15)
                 (Just <| fromCalendarDate 2016 Sep 15)
-      , percent = ""
-      , recentUsage = Nothing
+      , mode = Welcome
+      , refills = bugbug_RefillValues
+      , tankSize = 250
       , today = Nothing
+      , version = 1
       }
     , Cmd.none
     )
@@ -78,11 +74,15 @@ toggleDateSelector ds =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        EnterEditRefills ->
-            ( { model | mode = EditRefills }, Cmd.none )
+        AddRefill ->
+            { model
+                | mode = Status
+                , refills = Refills.addRefill model.refills
+            }
+                ! [ Task.perform ShowStatus Date.now ]
 
-        EnterSample percent ->
-            ( { model | percent = percent }, Cmd.none )
+        EnterAddRefills ->
+            ( { model | mode = EditRefills }, Cmd.none )
 
         OnSave ->
             model ! [ Task.perform ShowStatus Date.now ]
